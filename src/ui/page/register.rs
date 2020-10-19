@@ -9,7 +9,7 @@ impl super::Register {
 		};
 
 		// List of items
-		page.add_row("Lägenheter, lokaler & fastigheter");
+		page.add_row("Lägenheter");
 
 		page.layout.pack_start(&page.list, false, false, 0);
 

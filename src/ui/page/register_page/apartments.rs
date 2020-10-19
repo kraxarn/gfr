@@ -1,12 +1,13 @@
-use crate::ui::page::Page;
-use gtk::{BoxExt, GridExt, StackExt, StackSwitcherExt, WidgetExt};
+use gtk::prelude::Cast;
+use gtk::{BoxExt, GridExt, WidgetExt};
 
 const MARGIN: u32 = 12;
 
-struct Notes {
-	layout: gtk::Box,
-	stack: gtk::Stack,
-	switcher: gtk::StackSwitcher,
+enum InputType {
+	Entry,
+	ComboBox,
+	CheckButton,
+	SpinButton,
 }
 
 impl super::Apartments {
@@ -31,15 +32,34 @@ impl super::Apartments {
 
 		let labels = [
 			vec![
-				"Kontraktsnummer",
-				"Objektnummer",
-				"Hyresgäst",
-				"Person/Org. nr.",
-				"Fastighetsbeteckning",
-				"Adress",
-				"Postnummer",
+				("Objektnummer", InputType::Entry),
+				("Lägenhetsnummer", InputType::Entry),
+				("Fastighetsbeteckning", InputType::ComboBox),
+				("Adress", InputType::ComboBox),
+				("Postadress", InputType::ComboBox),
+				("Lägenhetstyp", InputType::ComboBox),
+				("Storlek kvm", InputType::SpinButton),
+				("Våning", InputType::SpinButton),
 			],
-			vec!["Telefon", "E-post"],
+			vec![
+				("Hyra/månad", InputType::Entry),
+				("Årshyra", InputType::Entry),
+				("Hyra/kvm", InputType::Entry),
+				("Övrigt", InputType::Entry),
+				("Vind", InputType::Entry),
+				("Källare", InputType::Entry),
+				("Förråd", InputType::Entry),
+				("Elanläggning nr.", InputType::Entry),
+				("Postbox nr.", InputType::Entry),
+			],
+			vec![
+				("Uthyrd", InputType::CheckButton),
+				("Hiss", InputType::CheckButton),
+				("Värme ingår", InputType::CheckButton),
+				("Hushållsel ingår", InputType::CheckButton),
+				("Trappstädning ingår", InputType::CheckButton),
+				("Varmvatten ingår hela året", InputType::CheckButton),
+			],
 		];
 
 		let mut r = 0;
@@ -53,49 +73,32 @@ impl super::Apartments {
 			r = 0;
 			c += 2;
 		}
-
-		self.base_options.attach(self.notes().widget(), 2, 2, 2, 5);
 	}
 
-	fn add_row(&self, label: &str, column: i32, row: i32) {
-		let label = gtk::Label::new(Some(label));
+	fn add_row(&self, input: &(&str, InputType), column: i32, row: i32) {
+		let label = gtk::Label::new(Some(input.0));
 		label.set_halign(gtk::Align::Start);
 		self.base_options.attach(&label, column, row, 1, 1);
 
-		let entry = gtk::Entry::new();
-		self.base_options.attach(&entry, column + 1, row, 1, 1);
-	}
-
-	fn notes(&self) -> Notes {
-		let notes = Notes {
-			layout: gtk::Box::new(gtk::Orientation::Vertical, 4),
-			stack: gtk::Stack::new(),
-			switcher: gtk::StackSwitcher::new(),
+		let entry: gtk::Widget = match input.1 {
+			InputType::Entry => gtk::Entry::new().upcast::<gtk::Widget>(),
+			InputType::ComboBox => gtk::ComboBox::new().upcast::<gtk::Widget>(),
+			InputType::CheckButton => gtk::CheckButton::new().upcast::<gtk::Widget>(),
+			InputType::SpinButton => gtk::SpinButton::new(
+				Some(&gtk::Adjustment::new(
+					25_f64, 1_f64, 50_f64, 1_f64, 0_f64, 0_f64,
+				)),
+				1_f64,
+				0,
+			)
+			.upcast::<gtk::Widget>(),
 		};
 
-		notes.switcher.set_stack(Some(&notes.stack));
-
-		notes.layout.pack_start(&notes.switcher, false, false, 0);
-		notes.layout.pack_start(&notes.stack, true, true, 0);
-
-		notes
-			.stack
-			.add_titled(&gtk::TextView::new(), "Egen", "Egen");
-		notes
-			.stack
-			.add_titled(&gtk::TextView::new(), "Faktura", "Faktura");
-
-		notes
+		self.base_options.attach(&entry, column + 1, row, 1, 1);
 	}
 }
 
 impl crate::ui::page::Page for super::Apartments {
-	fn widget(&self) -> &gtk::Widget {
-		self.layout.as_ref()
-	}
-}
-
-impl crate::ui::page::Page for Notes {
 	fn widget(&self) -> &gtk::Widget {
 		self.layout.as_ref()
 	}
