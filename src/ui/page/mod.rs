@@ -13,6 +13,5 @@ pub struct Home {
 
 pub struct Register {
 	layout: gtk::Box,
-	switcher: gtk::StackSwitcher,
-	stack: gtk::Stack,
+	list: gtk::ListBox,
 }
