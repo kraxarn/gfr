@@ -11,23 +11,27 @@ impl super::Register {
 		// List of items
 		page.add_row("Lägenheter");
 
-		page.layout.pack_start(&page.list, false, false, 0);
+		page.create_layout();
 
-		page.layout.pack_start(
+		page
+	}
+
+	fn create_layout(&self) {
+		self.layout.pack_start(&self.list, false, false, 0);
+
+		self.layout.pack_start(
 			&gtk::Separator::new(gtk::Orientation::Vertical),
 			false,
 			false,
 			0,
 		);
 
-		page.layout.pack_start(
+		self.layout.pack_start(
 			super::register_page::Apartments::new().widget(),
 			true,
 			true,
 			0,
 		);
-
-		page
 	}
 
 	fn add_row(&self, title: &str) {
