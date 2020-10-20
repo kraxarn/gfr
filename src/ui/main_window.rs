@@ -73,11 +73,7 @@ fn show_about_dialog(_: &gtk::ModelButton) {
 	dialog.set_website(option_env!("CARGO_PKG_HOMEPAGE"));
 	dialog.set_authors(&[env!("CARGO_PKG_AUTHORS")]);
 	dialog.set_logo_icon_name(crate::APPLICATION_ICON);
-	dialog.set_comments(Some(&format!(
-		"GTK {}.{}",
-		gtk::get_major_version(),
-		gtk::get_minor_version()
-	)));
+	dialog.set_comments(Some("Fastighetshanterare"));
 
 	dialog.connect_response(|about_dialog, _| {
 		about_dialog.set_visible(false);
