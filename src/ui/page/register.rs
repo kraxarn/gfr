@@ -1,28 +1,18 @@
+use crate::ui::page::page_data::PageData;
 use crate::ui::page::Page;
 use gtk::{BoxExt, ContainerExt, ImageExt, ListBoxExt, StackExt, WidgetExt};
-
-struct PageData {
-	name: String,
-	title: String,
-	show_arrow: bool,
-}
-
-impl PageData {
-	fn new(name: &str, title: &str, show_arrow: bool) -> Self {
-		Self {
-			name: name.to_string(),
-			title: title.to_string(),
-			show_arrow,
-		}
-	}
-}
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
 
 impl super::Register {
-	pub fn new() -> Self {
-		let page = Self {
+	pub fn new(main_window: Rc<crate::ui::MainWindow>) -> Self {
+		let mut page = Self {
 			layout: gtk::Box::new(gtk::Orientation::Horizontal, 0),
 			list: gtk::ListBox::new(),
 			stack: gtk::Stack::new(),
+			main_window,
+			page_data: Rc::new(RefCell::new(HashMap::new())),
 		};
 
 		// List of items
@@ -36,25 +26,29 @@ impl super::Register {
 		);
 
 		// Only actual page for now
-		page.add_row(
-			&PageData::new("apartments", "Lägenheter", true),
-			super::register_page::Apartments::new().widget(),
-		);
+		page.add_row(PageData::new(
+			"apartments",
+			"Lägenheter",
+			true,
+			Box::new(super::register_page::Apartments::new()),
+		));
 
 		// Temporary filler
 		let temp_pages = [
-			PageData::new("real_estate", "Fastigheter", true),
-			PageData::new("rooms", "Lokaler", true),
-			PageData::new("garages", "Garage/p-platser", true),
-			PageData::new("tenants", "Hyresgäster", true),
-			PageData::new("property_owner", "Fastighetsägare", false),
-			PageData::new("types", "Typer", false),
+			("real_estate", "Fastigheter", true),
+			("rooms", "Lokaler", true),
+			("garages", "Garage/p-platser", true),
+			("tenants", "Hyresgäster", true),
+			("property_owner", "Fastighetsägare", false),
+			("types", "Typer", false),
 		];
 		for temp_page in temp_pages.iter() {
-			page.add_row(
-				temp_page,
-				super::register_page::Empty::new(&temp_page.title, None).widget(),
-			);
+			page.add_row(PageData::new(
+				temp_page.0,
+				temp_page.1,
+				temp_page.2,
+				Box::new(super::register_page::Empty::new(&temp_page.1, None)),
+			));
 		}
 
 		page.create_layout();
@@ -75,18 +69,32 @@ impl super::Register {
 		self.layout.pack_start(&self.stack, true, true, 0);
 
 		let stack = self.stack.clone();
+		let main_window = self.main_window.clone();
+		let page_data = self.page_data.clone();
 
 		self.list.connect_row_selected(move |_, row| {
 			stack.set_visible_child_name(
 				&(match row {
-					Some(r) => r.get_widget_name().to_string(),
+					Some(r) => {
+						let widget_name = r.get_widget_name().to_string();
+
+						if let Some(data) = page_data.borrow_mut().get(&widget_name) {
+							main_window.set_back_title(if data.show_arrow {
+								Some(&data.title)
+							} else {
+								None
+							});
+						}
+
+						widget_name
+					}
 					None => "default".to_string(),
 				}),
 			)
 		});
 	}
 
-	fn add_row(&self, page_data: &PageData, child: &gtk::Widget) {
+	fn add_row(&mut self, page_data: PageData) {
 		// Row layout
 		let row = gtk::ListBoxRow::new();
 		row.set_widget_name(&page_data.name);
@@ -113,7 +121,13 @@ impl super::Register {
 
 		// Add to layout
 		self.list.add(&row);
-		self.stack.add_named(child, &page_data.name);
+		self.stack
+			.add_named(page_data.page.widget(), &page_data.name);
+
+		// Att to map
+		self.page_data
+			.borrow_mut()
+			.insert(page_data.name.to_string(), page_data);
 	}
 }
 

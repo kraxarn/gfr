@@ -1,9 +1,10 @@
 use crate::ui::page::Page;
 use gtk::prelude::*;
+use std::rc::Rc;
 
 impl super::MainWindow {
-	pub fn new(gtk_app: &gtk::Application) -> Self {
-		let window = Self {
+	pub fn new(gtk_app: &gtk::Application) -> Rc<Self> {
+		let window = Rc::new(Self {
 			application_window: gtk::ApplicationWindow::new(gtk_app),
 			header: gtk::HeaderBar::new(),
 			stack: gtk::Stack::new(),
@@ -11,12 +12,12 @@ impl super::MainWindow {
 
 			back_button: gtk::Button::new(),
 			back_title: gtk::Label::new(None),
-		};
-		window.init();
+		});
+		window.init(window.clone());
 		window
 	}
 
-	fn init(&self) {
+	fn init(&self, clone: Rc<Self>) {
 		// Window
 		self.application_window
 			.set_icon_name(crate::APPLICATION_ICON);
@@ -69,7 +70,7 @@ impl super::MainWindow {
 
 		// Pages
 		self.add_to_stack(super::page::Home::new().widget(), "Hem");
-		self.add_to_stack(super::page::Register::new().widget(), "Register");
+		self.add_to_stack(super::page::Register::new(clone).widget(), "Register");
 	}
 
 	fn add_to_stack(&self, widget: &gtk::Widget, title: &str) {
@@ -79,7 +80,7 @@ impl super::MainWindow {
 	pub fn set_back_title(&self, name: Option<&str>) {
 		match name {
 			Some(n) => {
-				self.back_title.set_markup(n);
+				self.back_title.set_markup(&format!("<b>{}</b>", n));
 				self.back_button.set_visible(true);
 			}
 			None => {
