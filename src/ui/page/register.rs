@@ -1,5 +1,21 @@
 use crate::ui::page::Page;
-use gtk::{BoxExt, ContainerExt, ListBoxExt, StackExt, WidgetExt};
+use gtk::{BoxExt, ContainerExt, ImageExt, ListBoxExt, StackExt, WidgetExt};
+
+struct PageData {
+	name: String,
+	title: String,
+	show_arrow: bool,
+}
+
+impl PageData {
+	fn new(name: &str, title: &str, show_arrow: bool) -> Self {
+		Self {
+			name: name.to_string(),
+			title: title.to_string(),
+			show_arrow,
+		}
+	}
+}
 
 impl super::Register {
 	pub fn new() -> Self {
@@ -21,25 +37,23 @@ impl super::Register {
 
 		// Only actual page for now
 		page.add_row(
-			"Lägenheter",
-			"apartments",
+			&PageData::new("apartments", "Lägenheter", true),
 			super::register_page::Apartments::new().widget(),
 		);
 
 		// Temporary filler
 		let temp_pages = [
-			("property_owner", "Fastighetsägare"),
-			("real_estate", "Fastigheter"),
-			("rooms", "Lokaler"),
-			("garages", "Garage/p-platser"),
-			("tenants", "Hyresgäster"),
-			("apartment_types", "Lägenhetstyper"),
+			PageData::new("real_estate", "Fastigheter", true),
+			PageData::new("rooms", "Lokaler", true),
+			PageData::new("garages", "Garage/p-platser", true),
+			PageData::new("tenants", "Hyresgäster", true),
+			PageData::new("property_owner", "Fastighetsägare", false),
+			PageData::new("types", "Typer", false),
 		];
 		for temp_page in temp_pages.iter() {
 			page.add_row(
-				temp_page.1,
-				temp_page.0,
-				super::register_page::Empty::new(temp_page.1, None).widget(),
+				temp_page,
+				super::register_page::Empty::new(&temp_page.title, None).widget(),
 			);
 		}
 
@@ -72,20 +86,34 @@ impl super::Register {
 		});
 	}
 
-	fn add_row(&self, title: &str, name: &str, child: &gtk::Widget) {
-		// Label to show in list
-		let label = gtk::Label::new(Some(title));
+	fn add_row(&self, page_data: &PageData, child: &gtk::Widget) {
+		// Row layout
+		let row = gtk::ListBoxRow::new();
+		row.set_widget_name(&page_data.name);
+		let layout = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+		row.add(&layout);
+
+		// Label
+		let label = gtk::Label::new(Some(&page_data.title));
 		label.set_property_margin(12);
 		label.set_halign(gtk::Align::Start);
+		layout.pack_start(&label, true, true, 12);
 
-		// Actual row
-		let row = gtk::ListBoxRow::new();
-		row.set_widget_name(name);
-		row.add(&label);
+		// Arrow icon
+		let image = gtk::Image::new();
+		image.set_from_icon_name(
+			if page_data.show_arrow {
+				Some("go-next-symbolic")
+			} else {
+				None
+			},
+			gtk::IconSize::Button,
+		);
+		layout.pack_end(&image, false, false, 12);
+
+		// Add to layout
 		self.list.add(&row);
-
-		// Add to stack
-		self.stack.add_named(child, name);
+		self.stack.add_named(child, &page_data.name);
 	}
 }
 
