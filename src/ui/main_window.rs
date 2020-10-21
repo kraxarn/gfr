@@ -69,25 +69,37 @@ impl super::MainWindow {
 		self.application_window.add(&self.stack);
 
 		// Pages
-		self.add_to_stack(super::page::Home::new().widget(), "Hem");
-		self.add_to_stack(super::page::Register::new(clone).widget(), "Register");
+		self.add_to_stack(super::page::Home::new().widget(), "home", "Hem");
+		self.add_to_stack(
+			super::page::Register::new(clone.clone()).widget(),
+			"register",
+			"Register",
+		);
+
+		self.stack
+			.connect_property_visible_child_notify(move |stack| {
+				if let Some(name) = stack.get_visible_child_name() {
+					clone.toggle_back_title(name == "register");
+				}
+			});
 	}
 
-	fn add_to_stack(&self, widget: &gtk::Widget, title: &str) {
-		self.stack.add_titled(widget, title, title);
+	fn add_to_stack(&self, widget: &gtk::Widget, name: &str, title: &str) {
+		self.stack.add_titled(widget, name, title);
 	}
 
 	pub fn set_back_title(&self, name: Option<&str>) {
-		match name {
-			Some(n) => {
-				self.back_title.set_markup(&format!("<b>{}</b>", n));
-				self.back_button.set_visible(true);
-			}
-			None => {
-				self.back_title.set_text("");
-				self.back_button.set_visible(false);
-			}
+		self.back_title.set_visible(name.is_some());
+		self.back_button.set_visible(name.is_some());
+		if let Some(n) = name {
+			self.back_title.set_markup(&format!("<b>{}</b>", n));
 		}
+	}
+
+	fn toggle_back_title(&self, visible: bool) {
+		let show = visible && !self.back_title.get_text().is_empty();
+		self.back_title.set_visible(show);
+		self.back_button.set_visible(show);
 	}
 }
 
