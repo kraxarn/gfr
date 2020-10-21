@@ -8,6 +8,9 @@ impl super::MainWindow {
 			header: gtk::HeaderBar::new(),
 			stack: gtk::Stack::new(),
 			switcher: gtk::StackSwitcher::new(),
+
+			back_button: gtk::Button::new(),
+			back_title: gtk::Label::new(None),
 		};
 		window.init();
 		window
@@ -51,6 +54,14 @@ impl super::MainWindow {
 		menu_button.set_popover(Some(&popover));
 		self.header.pack_end(&menu_button);
 
+		// Go back button
+		self.back_button.set_image(Some(&gtk::Image::from_icon_name(
+			Some("go-previous-symbolic"),
+			gtk::IconSize::Button,
+		)));
+		self.header.pack_start(&self.back_button);
+		self.header.pack_start(&self.back_title);
+
 		// Application window
 		self.application_window.set_titlebar(Some(&self.header));
 		self.application_window.set_default_size(1280, 720);
@@ -63,6 +74,19 @@ impl super::MainWindow {
 
 	fn add_to_stack(&self, widget: &gtk::Widget, title: &str) {
 		self.stack.add_titled(widget, title, title);
+	}
+
+	pub fn set_back_title(&self, name: Option<&str>) {
+		match name {
+			Some(n) => {
+				self.back_title.set_markup(n);
+				self.back_button.set_visible(true);
+			}
+			None => {
+				self.back_title.set_text("");
+				self.back_button.set_visible(false);
+			}
+		}
 	}
 }
 

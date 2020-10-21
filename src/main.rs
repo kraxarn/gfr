@@ -11,6 +11,7 @@ fn main() {
 	app.connect_activate(|app| {
 		let window = ui::MainWindow::new(app);
 		window.application_window.show_all();
+		window.set_back_title(None);
 	});
 	app.run(&std::env::args().collect::<Vec<String>>());
 }
