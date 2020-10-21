@@ -31,7 +31,8 @@ impl super::MainWindow {
 
 		// Menu
 		let menu_button = gtk::MenuButton::new();
-		let menu_image = gtk::Image::from_icon_name(Some("view-more"), gtk::IconSize::Menu);
+		let menu_image =
+			gtk::Image::from_icon_name(Some("open-menu-symbolic"), gtk::IconSize::Button);
 		menu_button.set_image(Some(&menu_image));
 
 		// Popover menu
