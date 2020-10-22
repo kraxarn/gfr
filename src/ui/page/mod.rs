@@ -22,4 +22,5 @@ pub struct Register {
 	list: gtk::ListBox,
 	stack: gtk::Stack,
 	page_data: Rc<RefCell<HashMap<String, PageData>>>,
+	lists: gtk::Stack,
 }

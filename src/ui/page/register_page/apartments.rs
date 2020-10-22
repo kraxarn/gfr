@@ -15,6 +15,7 @@ impl super::Apartments {
 		let page = Self {
 			layout: gtk::Box::new(gtk::Orientation::Vertical, 16),
 			base_options: gtk::Grid::new(),
+			list: gtk::ListBox::new(),
 		};
 
 		page.init_base_options();
@@ -98,8 +99,12 @@ impl super::Apartments {
 	}
 }
 
-impl crate::ui::page::Page for super::Apartments {
+impl super::RegisterPage for super::Apartments {
 	fn widget(&self) -> &gtk::Widget {
-		self.layout.as_ref()
+		self.layout.upcast_ref::<gtk::Widget>()
+	}
+
+	fn list(&self) -> Option<&gtk::ListBox> {
+		Some(&self.list)
 	}
 }

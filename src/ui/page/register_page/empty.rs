@@ -1,4 +1,5 @@
-use gtk::{ContainerExt, ImageExt, LabelExt, WidgetExt};
+use gtk::prelude::Cast;
+use gtk::{ContainerExt, ImageExt, LabelExt, ListBox, WidgetExt};
 
 impl super::Empty {
 	pub fn new(label: &str, icon_name: Option<&str>) -> Self {
@@ -20,8 +21,12 @@ impl super::Empty {
 	}
 }
 
-impl crate::ui::page::Page for super::Empty {
+impl super::RegisterPage for super::Empty {
 	fn widget(&self) -> &gtk::Widget {
-		self.layout.as_ref()
+		self.layout.upcast_ref::<gtk::Widget>()
+	}
+
+	fn list(&self) -> Option<&ListBox> {
+		None
 	}
 }

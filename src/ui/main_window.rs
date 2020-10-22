@@ -69,12 +69,17 @@ impl super::MainWindow {
 		self.application_window.add(&self.stack);
 
 		// Pages
+		let register_page = Rc::new(super::page::Register::new(clone.clone()));
+
 		self.add_to_stack(super::page::Home::new().widget(), "home", "Hem");
-		self.add_to_stack(
-			super::page::Register::new(clone.clone()).widget(),
-			"register",
-			"Register",
-		);
+		self.add_to_stack(register_page.clone().widget(), "register", "Register");
+
+		let register_clone = register_page.clone();
+		let clone_clone = clone.clone();
+		self.back_button.connect_clicked(move |_| {
+			register_clone.show_list_child(None);
+			clone_clone.toggle_back_title(false);
+		});
 
 		self.stack
 			.connect_property_visible_child_notify(move |stack| {

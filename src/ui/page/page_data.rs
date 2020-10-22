@@ -1,17 +1,22 @@
 pub(crate) struct PageData {
 	pub name: String,
 	pub title: String,
+	pub page: Box<dyn super::register_page::RegisterPage>,
 	pub show_arrow: bool,
-	pub page: Box<dyn super::Page>,
 }
 
 impl PageData {
-	pub fn new(name: &str, title: &str, show_arrow: bool, page: Box<dyn super::Page>) -> Self {
+	pub fn new(
+		name: &str,
+		title: &str,
+		show_arrow: bool,
+		page: Box<dyn super::register_page::RegisterPage>,
+	) -> Self {
 		Self {
 			name: name.to_string(),
 			title: title.to_string(),
-			show_arrow,
 			page,
+			show_arrow,
 		}
 	}
 }

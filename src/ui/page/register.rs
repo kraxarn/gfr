@@ -1,5 +1,5 @@
+use super::register_page::RegisterPage;
 use crate::ui::page::page_data::PageData;
-use crate::ui::page::Page;
 use gtk::{BoxExt, ContainerExt, ImageExt, ListBoxExt, StackExt, WidgetExt};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -13,11 +13,16 @@ impl super::Register {
 			stack: gtk::Stack::new(),
 			main_window,
 			page_data: Rc::new(RefCell::new(HashMap::new())),
+			lists: gtk::Stack::new(),
 		};
 
 		// List of items
 		page.stack
 			.set_transition_type(gtk::StackTransitionType::SlideUpDown);
+
+		page.lists.add_named(&page.list, "default");
+		page.lists
+			.set_transition_type(gtk::StackTransitionType::SlideLeftRight);
 
 		// "Welcome" page
 		page.stack.add_named(
@@ -57,7 +62,7 @@ impl super::Register {
 	}
 
 	fn create_layout(&self) {
-		self.layout.pack_start(&self.list, false, false, 0);
+		self.layout.pack_start(&self.lists, false, false, 0);
 
 		self.layout.pack_start(
 			&gtk::Separator::new(gtk::Orientation::Vertical),
@@ -71,6 +76,7 @@ impl super::Register {
 		let stack = self.stack.clone();
 		let main_window = self.main_window.clone();
 		let page_data = self.page_data.clone();
+		let lists = self.lists.clone();
 
 		self.list.connect_row_selected(move |_, row| {
 			stack.set_visible_child_name(
@@ -84,6 +90,9 @@ impl super::Register {
 							} else {
 								None
 							});
+							if data.show_arrow {
+								lists.set_visible_child_name(&data.name);
+							}
 						}
 
 						widget_name
@@ -124,10 +133,22 @@ impl super::Register {
 		self.stack
 			.add_named(page_data.page.widget(), &page_data.name);
 
+		// Add to lists
+		if let Some(list) = page_data.page.list() {
+			self.lists.add_named(list, &page_data.name);
+		}
+
 		// Att to map
 		self.page_data
 			.borrow_mut()
 			.insert(page_data.name.to_string(), page_data);
+	}
+
+	pub fn show_list_child(&self, name: Option<&str>) {
+		self.lists.set_visible_child_name(match name {
+			Some(n) => n,
+			None => "default",
+		})
 	}
 }
 
