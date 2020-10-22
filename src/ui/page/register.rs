@@ -1,6 +1,6 @@
 use super::register_page::RegisterPage;
 use crate::ui::page::page_data::PageData;
-use gtk::{BoxExt, ContainerExt, ImageExt, ListBoxExt, StackExt, WidgetExt};
+use gtk::{BoxExt, ContainerExt, ListBoxExt, StackExt, WidgetExt};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -104,29 +104,16 @@ impl super::Register {
 	}
 
 	fn add_row(&mut self, page_data: PageData) {
-		// Row layout
-		let row = gtk::ListBoxRow::new();
-		row.set_widget_name(&page_data.name);
-		let layout = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-		row.add(&layout);
-
-		// Label
-		let label = gtk::Label::new(Some(&page_data.title));
-		label.set_property_margin(12);
-		label.set_halign(gtk::Align::Start);
-		layout.pack_start(&label, true, true, 12);
-
-		// Arrow icon
-		let image = gtk::Image::new();
-		image.set_from_icon_name(
+		// Row
+		let row = crate::ui::widget::list_item(
+			&page_data.name,
+			Some(&page_data.title),
 			if page_data.show_arrow {
 				Some("go-next-symbolic")
 			} else {
 				None
 			},
-			gtk::IconSize::Button,
 		);
-		layout.pack_end(&image, false, false, 12);
 
 		// Add to layout
 		self.list.add(&row);
