@@ -2,6 +2,41 @@ use crate::ui::page::Page;
 use gtk::prelude::*;
 use std::rc::Rc;
 
+struct CrudOptions {
+	save: gtk::Button,
+	delete: gtk::Button,
+}
+
+impl CrudOptions {
+	fn new(header: &gtk::HeaderBar) -> Self {
+		let opt = Self {
+			save: gtk::Button::new(),
+			delete: gtk::Button::new(),
+		};
+
+		opt.save.set_image(Some(&gtk::Image::from_icon_name(
+			Some("document-save"),
+			gtk::IconSize::Button,
+		)));
+
+		opt.delete.set_image(Some(&gtk::Image::from_icon_name(
+			Some("edit-delete"),
+			gtk::IconSize::Button,
+		)));
+
+		header.pack_end(&gtk::Separator::new(gtk::Orientation::Vertical));
+		header.pack_end(&opt.delete);
+		header.pack_end(&opt.save);
+
+		opt
+	}
+
+	fn set_visible(&self, visible: bool) {
+		self.save.set_visible(visible);
+		self.delete.set_visible(visible);
+	}
+}
+
 impl super::MainWindow {
 	pub fn new(gtk_app: &gtk::Application) -> Rc<Self> {
 		let window = Rc::new(Self {
@@ -54,6 +89,10 @@ impl super::MainWindow {
 		popover.add(&popover_content);
 		menu_button.set_popover(Some(&popover));
 		self.header.pack_end(&menu_button);
+
+		// Save/delete
+		let crud = CrudOptions::new(&self.header);
+		crud.set_visible(false);
 
 		// Go back button
 		self.back_button.set_image(Some(&gtk::Image::from_icon_name(
