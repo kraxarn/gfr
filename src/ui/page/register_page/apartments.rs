@@ -1,5 +1,5 @@
 use gtk::prelude::Cast;
-use gtk::{BoxExt, GridExt, WidgetExt};
+use gtk::{BoxExt, ContainerExt, GridExt, ListBoxExt, WidgetExt};
 
 const MARGIN: u32 = 12;
 
@@ -23,6 +23,12 @@ impl super::Apartments {
 		page.layout.pack_start(&page.base_options, false, false, 0);
 		page.layout.set_property_margin(32);
 		page.layout.set_halign(gtk::Align::Center);
+
+		// Temporary util we can save items
+		let no_apartments =
+			crate::ui::widget::list_item("no_apartments", Some("<i>Ny lägenhet</i>"), None);
+		page.list.add(&no_apartments);
+		page.list.select_row(Some(&no_apartments));
 
 		page
 	}
