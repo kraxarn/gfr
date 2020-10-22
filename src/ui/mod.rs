@@ -1,6 +1,7 @@
 pub mod main_window;
 
 mod page;
+mod widget;
 
 pub struct MainWindow {
 	pub application_window: gtk::ApplicationWindow,
