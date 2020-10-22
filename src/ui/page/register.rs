@@ -135,7 +135,10 @@ impl super::Register {
 		self.lists.set_visible_child_name(match name {
 			Some(n) => n,
 			None => "default",
-		})
+		});
+		if name.is_none() {
+			self.list.select_row(None::<&gtk::ListBoxRow>);
+		}
 	}
 }
 
