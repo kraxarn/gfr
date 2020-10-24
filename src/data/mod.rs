@@ -19,7 +19,7 @@ impl DataConnection {
 	fn ensure_created(&self) -> Result<(), rusqlite::Error> {
 		// Check if config exists
 		let updated = match self.get_config() {
-			Ok(config) => (config.version >= sql::DATABASE_VERSION),
+			Ok(config) => (config.version <= sql::DATABASE_VERSION),
 			Err(_) => false,
 		};
 		if !updated {
