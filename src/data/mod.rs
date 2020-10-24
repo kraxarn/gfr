@@ -24,19 +24,12 @@ impl DataConnection {
 		};
 		if !updated {
 			let rows = self.db.execute(sql::MIGRATION, rusqlite::params![])?;
-			println!(
-				"database updated to version {}: {} rows affected",
+			self.set_config(sql::DATABASE_VERSION)?;
+			log::info!(
+				"database updated to version {} (affected rows: {})",
 				sql::DATABASE_VERSION,
 				rows
 			);
-		}
-
-		// If there's no known version, set it
-		match self.get_config() {
-			Ok(_) => (),
-			Err(_) => {
-				self.new_config()?;
-			}
 		}
 
 		Ok(())
