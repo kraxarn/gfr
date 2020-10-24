@@ -1,16 +1,14 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize, Serialize)]
 pub struct Config {
 	pub version: i64,
 }
 
 impl super::DataConnection {
-	pub fn new_config(&self) -> Result<Config, rocksdb::Error> {
+	pub fn new_config(&self) -> Result<Config, rusqlite::Error> {
 		let config = Config {
 			version: super::sql::DATABASE_VERSION,
 		};
-		self.open("config")?.put("0", bincode::serialize(&config));
+		self.db
+			.execute("insert into Config (version) values (?)", &[config.version])?;
 		Ok(config)
 	}
 
