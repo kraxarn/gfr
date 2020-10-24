@@ -1,6 +1,7 @@
 use gio::prelude::*;
 use gtk::prelude::*;
 
+mod data;
 mod ui;
 
 pub const APPLICATION_ICON: Option<&str> = Some("go-home");
